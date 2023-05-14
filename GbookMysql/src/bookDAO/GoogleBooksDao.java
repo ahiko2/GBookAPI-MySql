@@ -87,6 +87,7 @@ public class GoogleBooksDao {
 
         return books;
     }
+
     public List<BookDto> selectAll() throws SQLException, ClassNotFoundException {
         List<BookDto> books = new ArrayList<>();
         String sql = "SELECT * FROM booklist";
@@ -107,5 +108,33 @@ public class GoogleBooksDao {
         }
         return books;
     }
+
+    public void saveBookToDatabase(BookDto book) {
+        System.out.println("saveBookToDatabase called");
+        String sql = "INSERT INTO booklist (isbn, title, authors, published_date) VALUES (?, ?, ?, ?)";
+        PreparedStatement stmt = null;
+        try {
+            stmt = this.con.prepareStatement(sql);
+            stmt.setString(1, book.getIsbn());
+            stmt.setString(2, book.getTitle());
+            stmt.setString(3, String.join(", ", book.getAuthors())); // Assuming authors is a List of Strings
+            stmt.setString(4, book.getPublishedDate());
+
+            System.out.println("About to execute update"); // New print statement
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Rows affected: " + rowsAffected);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 }

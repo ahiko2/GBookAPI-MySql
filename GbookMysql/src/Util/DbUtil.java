@@ -31,7 +31,7 @@ public class DbUtil {
 //    }
 
     // Connectionを単一のインスタンスとする
-    private static Connection con;
+    public static Connection con;
 
 //turn off or on based on your pc unit
     static String url = "jdbc:mysql://localhost:3306/mydb";
@@ -49,36 +49,12 @@ public class DbUtil {
 
     }
 
-
-
-
-
-    /*
-     * TODO 以下の仕様でメソッドを作成してください。
-     *
-     * 戻り値		：なし
-     * メソッド名	：closeStatement
-     * 引数			：DBステートメント(PreparedStatement型)
-     * 例外			：SQLException
-     * 処理			：引数のDBステートメントがnullでない場合、そのDBステートメントをクローズする
-     */
     public static void closeStatement(PreparedStatement stmt) throws SQLException {
         if(stmt != null) {
             stmt.close();
         }
     }
 
-
-
-    /*
-     * TODO 以下の仕様でメソッドを作成してください。
-     *
-     * 戻り値		：なし
-     * メソッド名	：closeConnection()
-     * 引数			：切断するコネクション(Connection型)
-     * 例外			：SQLException
-     * 処理			：引数のコネクションがnullでない場合、そのコネクションを切断する
-     */
     public static void closeConnection(Connection con) throws SQLException{
         if(con!=null) {
             con.close();
