@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -39,9 +41,9 @@ public class Main {
         return true;
     }
     
-    public void start() throws ClassNotFoundException, SQLException {
+    public void start() throws ClassNotFoundException, SQLException, IOException {
         System.out.println();
-        System.out.println("1:本の一覧 2:追加  3:本の削除 0:終了");
+        System.out.println("1:本の一覧　2:追加　3:本の削除　4:Googleから本を探す　0:終了");
         String ope = sc.nextLine();
         switch (ope) {
             case "1":
@@ -53,6 +55,9 @@ public class Main {
             case "3":
             	DeleteBook();
                 break;
+            case "4":
+            	getMultipleBooks();
+            	break;
 
             case "0":
                 System.out.println("システムを終了します");
@@ -66,13 +71,31 @@ public class Main {
     public static void showBooks() throws SQLException {
         Connection con = null;
         GoogleBooksDao booksDao = null;
+        System.out.println("1:１個づつ　2:テーブル型　0:終了");
+        String ope = sc.nextLine();
 
         try {
              con = DbUtil.getConnection(); //Establish connection
              booksDao = new GoogleBooksDao(con); //Pass connection to Dao
 
             List<BookDto> books = booksDao.selectAll(); //Call selectAll method from DAO
-            BookPrinter.printBookData(books);
+         //   
+            switch (ope) {
+            case "1":
+            	BookPrinter.printBookData(books);
+                break;
+            case "2":
+            	BookPrinter.printBookData_intableform(books);
+                break;
+            case "0":
+                System.out.println("システムを終了します");
+                System.exit(0);
+            default:
+                System.out.println("指定の番号を入力してください");
+                break;
+        }
+            
+            
 
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -110,12 +133,14 @@ public class Main {
                 System.out.println("タイトル		: " + book.getTitle());
                 System.out.println("作家名			: " + book.getAuthors());
                 System.out.println("出版日			: " + book.getPublishedDate());
+                System.out.println("概要			: " + book.getDescription());
                 System.out.println();
-
+                
                 
                 //since book.getisbn is string, need to parse this into long, cannot int coz too long
                 long isbnLong = Long.parseLong(book.getIsbn());
                 List<BookDto> existingBooks = booksDao.selectbyISBN(isbnLong);
+                
                 if (!existingBooks.isEmpty()) {
                     System.out.println("もうすでに保存済みです");
                 } else {
@@ -177,6 +202,49 @@ public class Main {
 
         }
     }
+    public static void getMultipleBooks() throws ClassNotFoundException, SQLException, IOException {
+    	 System.out.println("探したい本の名前を入力してください");
+    	 Connection con = DbUtil.getConnection();
+    	 
+        
+         //API link from google
+    	 //since this is looking for multiple data
+    	 //maxResults=" + maxResults better add this one
+         String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=:";
+         
+         
+    
+         //example
+         //https://www.googleapis.com/books/v1/volumes?q=isbn:9784844336778
+        try {
+        
+        	 String query = sc.nextLine();
+        	 String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+             
+             
+             //for now, i have setup max result as 10 books
+             String maxresult ="&maxResults=5";
+             // Send GET request and retrieve response
+             String jsonResponse = ConnUtil.sendGetRequest(apiUrl + encodedQuery+ maxresult);
+             GoogleBooksDao booksDao = new GoogleBooksDao(con);
+             // Parse JSON and retrieve book data
+             List<BookDto> books = booksDao.parseJsonResponse(jsonResponse);
+             // Print book data
+             if(!books.isEmpty()) {
+            	// System.out.println("hi, total data =" + books.size());
+            	BookPrinter.printBookData_description(books);
+            	 
+             }else {
+            	 System.out.println("nope");
+             }
+        }
+        finally {
+            DbUtil.closeConnection(con); // Close connection
+
+        }
+        
+    }
+    
 
 
 

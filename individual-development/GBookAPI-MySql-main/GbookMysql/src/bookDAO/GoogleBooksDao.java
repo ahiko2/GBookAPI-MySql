@@ -48,6 +48,7 @@ public class GoogleBooksDao {
             String title = "";
             List<String> authors = new ArrayList<>();
             String publishedDate = "";
+            String description = "";
 
             if (volumeInfoObject.has("industryIdentifiers")) {
                 JsonArray identifiersArray = volumeInfoObject.getAsJsonArray("industryIdentifiers");
@@ -64,6 +65,7 @@ public class GoogleBooksDao {
             if (volumeInfoObject.has("title")) {
                 title = volumeInfoObject.get("title").getAsString(); // title取得
             }
+            
 
             if (volumeInfoObject.has("authors")) {
                 JsonArray authorsArray = volumeInfoObject.getAsJsonArray("authors");
@@ -84,13 +86,20 @@ public class GoogleBooksDao {
                 }
 
             }
+            if (volumeInfoObject.has("description")) {
+                description = volumeInfoObject.get("description").getAsString(); // Retrieve the description
+                if (description.length() > 500) {
+                    description = description.substring(0, 500); // Truncate the description to 500 characters
+                }
+            }
 
             BookDto bookDto = new BookDto();
             bookDto.setIsbn(isbn);
             bookDto.setTitle(title);
             bookDto.setAuthors(authors);
             bookDto.setPublishedDate(publishedDate);
-
+            bookDto.setDescription(description);
+            
             books.add(bookDto);
         }
 
@@ -110,6 +119,7 @@ public class GoogleBooksDao {
                 book.setTitle(rs.getString("title"));
                 book.setAuthors(Arrays.asList(rs.getString("authors").split(", ")));
                 book.setPublishedDate(rs.getString("published_date"));
+                book.setTimestamp(rs.getTimestamp("timestamp"));
                 books.add(book);
             }
         } finally {
@@ -120,7 +130,7 @@ public class GoogleBooksDao {
 
     public void saveBookToDatabase(BookDto book) throws SQLException {
         
-        String sql = "INSERT INTO "+NM_TABLE+" (isbn, title, authors, published_date) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO "+NM_TABLE+" (isbn,title, authors, published_date,description) VALUES (?, ?, ?, ?, ?)";
         
         try {
             this.stmt = this.con.prepareStatement(sql);
@@ -128,8 +138,9 @@ public class GoogleBooksDao {
             stmt.setString(2, book.getTitle());
             stmt.setString(3, String.join(", ", book.getAuthors())); // 複数人の１行にまとめる
             stmt.setString(4, book.getPublishedDate());
+            stmt.setString(5,book.getDescription());
             
-           
+            
             int rowsAffected = stmt.executeUpdate();
             
             if(rowsAffected  ==1) {
@@ -161,6 +172,9 @@ public class GoogleBooksDao {
                 book.setTitle(rs.getString("title"));
                 book.setAuthors(Arrays.asList(rs.getString("authors").split(", ")));
                 book.setPublishedDate(rs.getString("published_date"));
+                book.setDescription(rs.getString("description"));
+                
+               
 
                 
                 rtnList.add(book);

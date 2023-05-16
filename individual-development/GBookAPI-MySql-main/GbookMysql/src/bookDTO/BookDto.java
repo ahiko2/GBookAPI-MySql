@@ -1,5 +1,6 @@
 package bookDTO;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public class BookDto {
@@ -7,7 +8,8 @@ public class BookDto {
     private String title;
     private List<String> authors;
     private String publishedDate;
-
+    private String description;
+    private Timestamp timestamp;
 
     public String getIsbn() {
         return isbn;
@@ -40,4 +42,20 @@ public class BookDto {
     public void setPublishedDate(String publishedDate) {
         this.publishedDate = publishedDate;
     }
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
+	}
 }
