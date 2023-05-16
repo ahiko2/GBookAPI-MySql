@@ -243,7 +243,20 @@ public class Main {
 
         }
         
+        
     }
+    // new feature
+//      public static void checkDataType3(String str) {
+//         if (str.matches("^[a-zA-Z0-9]+$")) {
+//             if (str.matches("^[0-9]+$") && str.length() == 13) {
+//                 System.out.println("The string is an integer with a length of 13");
+//             } else {
+//                 System.out.println("The string is a regular string");
+//             }
+//         } else {
+//             System.out.println("The string contains invalid characters");
+//         }
+//     }
     
 
 
